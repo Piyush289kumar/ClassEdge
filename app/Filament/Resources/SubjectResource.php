@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SubjectResource\Pages;
-use App\Filament\Resources\SubjectResource\RelationManagers;
 use App\Models\Subject;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -17,26 +16,57 @@ class SubjectResource extends Resource
 {
     protected static ?string $model = Subject::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+    protected static ?string $navigationGroup = 'Academics';
+    protected static ?string $navigationLabel = 'Subjects';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('code')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('credits')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\Textarea::make('description')
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('meta')
-                    ->columnSpanFull(),
+                Forms\Components\Section::make('Subject Information')
+                    ->description('Provide the details of the subject')
+                    ->schema([
+                        Forms\Components\TextInput::make('code')
+                            ->label('Subject Code')
+                            ->placeholder('E.g., CSE101')
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(50)
+                            ->columnSpan(2),
+
+                        Forms\Components\TextInput::make('name')
+                            ->label('Subject Name')
+                            ->placeholder('E.g., Data Structures')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpan(4),
+
+                        Forms\Components\TextInput::make('credits')
+                            ->numeric()
+                            ->label('Credits')
+                            ->default(0)
+                            ->minValue(0)
+                            ->maxValue(10)
+                            ->suffix('credits')
+                            ->columnSpan(2),
+                    ])
+                    ->columns(6),
+
+                Forms\Components\Section::make('Additional Information')
+                    ->schema([
+                        Forms\Components\Textarea::make('description')
+                            ->rows(4)
+                            ->placeholder('Brief description of the subject...')
+                            ->columnSpanFull(),
+
+                        Forms\Components\KeyValue::make('meta')
+                            ->label('Metadata')
+                            ->addButtonLabel('Add Meta Info')
+                            ->columnSpanFull(),
+                    ])
+                    ->collapsible()
+                    ->collapsed(),
             ]);
     }
 
@@ -44,26 +74,33 @@ class SubjectResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('code')
+                    ->label('Code')
+                    ->badge()
+                    ->color('primary')
+                    ->sortable()
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                    ->label('Subject Name')
+                    ->searchable()
+                    ->sortable()
+                    ->wrap(),
+
                 Tables\Columns\TextColumn::make('credits')
-                    ->numeric()
+                    ->label('Credits')
+                    ->badge()
+                    ->color('success')
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Created On')
+                    ->date('d M, Y')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
+                    ->label('Last Updated')
+                    ->date('d M, Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -71,22 +108,23 @@ class SubjectResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
