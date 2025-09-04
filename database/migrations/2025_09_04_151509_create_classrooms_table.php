@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('classrooms', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('code')->unique(); // e.g., A-101
+            $table->string('code')->unique()->index();
             $table->string('name')->nullable(); // optional friendly name
             $table->string('location')->nullable();
             $table->unsignedInteger('capacity')->nullable();

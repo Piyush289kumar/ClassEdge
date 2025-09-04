@@ -17,25 +17,41 @@ class ClassroomResource extends Resource
 {
     protected static ?string $model = Classroom::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static ?string $navigationGroup = 'Academics'; // group in sidebar
 
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(2) // Two-column layout for cleaner UI
             ->schema([
                 Forms\Components\TextInput::make('code')
+                    ->label('Classroom Code')
                     ->required()
-                    ->maxLength(255),
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(50)
+                    ->helperText('Example: A-101, B-202'),
+
                 Forms\Components\TextInput::make('name')
-                    ->maxLength(255)
-                    ->default(null),
+                    ->label('Name')
+                    ->maxLength(100)
+                    ->placeholder('e.g. Physics Lab'),
+
                 Forms\Components\TextInput::make('location')
+                    ->label('Location')
                     ->maxLength(255)
-                    ->default(null),
+                    ->placeholder('Building A, 2nd Floor'),
+
                 Forms\Components\TextInput::make('capacity')
+                    ->label('Capacity')
                     ->numeric()
-                    ->default(null),
-                Forms\Components\Textarea::make('meta')
+                    ->minValue(1)
+                    ->maxValue(500)
+                    ->placeholder('Enter number of seats'),
+
+                Forms\Components\KeyValue::make('meta')
+                    ->label('Extra Details')
+                    ->helperText('Store additional details in key-value pairs')
                     ->columnSpanFull(),
             ]);
     }
@@ -44,28 +60,42 @@ class ClassroomResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('code')
-                    ->searchable(),
+                    ->label('Code')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('primary'),
+
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('location')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('capacity')
-                    ->numeric()
+                    ->label('Name')
+                    ->searchable()
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('location')
+                    ->label('Location')
+                    ->searchable()
+                    ->icon('heroicon-o-map-pin')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('capacity')
+                    ->label('Capacity')
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (int $state): string => match (true) {
+                        $state < 20 => 'danger',
+                        $state < 50 => 'warning',
+                        default => 'success',
+                    }),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Created On')
+                    ->date('d M Y')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
+                    ->label('Last Updated')
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -73,7 +103,9 @@ class ClassroomResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -81,13 +113,14 @@ class ClassroomResource extends Resource
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\BatchesRelationManager::class,
         ];
     }
 

@@ -12,8 +12,8 @@ return new class extends Migration {
     {
         Schema::create('admissions', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignUlid('student_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignUlid('course_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreignUlid('student_id')->nullable()->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignUlid('course_id')->nullable()->constrained()->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignUlid('batch_id')->nullable()->constrained()->nullOnDelete();
             $table->date('admitted_on')->index();
             $table->enum('status', ['pending', 'admitted', 'rejected', 'withdrawn', 'completed'])->default('admitted')->index();

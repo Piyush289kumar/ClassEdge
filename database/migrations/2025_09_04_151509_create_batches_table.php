@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('batches', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignUlid('course_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreignUlid('course_id')->nullable()->constrained()->restrictOnDelete();
             $table->foreignUlid('classroom_id')->nullable()->constrained()->nullOnDelete();
             $table->string('code')->unique(); // section code e.g. CSE-2025-A
             $table->string('name')->nullable(); // Section A
