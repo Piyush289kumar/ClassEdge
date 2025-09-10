@@ -24,7 +24,7 @@ class CourseResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')->required(),
                 Forms\Components\Textarea::make('description'),
-                Forms\Components\TextInput::make('code'),
+                Forms\Components\TextInput::make('code')->default(now())->required(),
             ]);
     }
 
