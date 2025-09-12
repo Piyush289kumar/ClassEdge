@@ -53,7 +53,7 @@ class StudentResource extends Resource
     {
         return [
             GuardiansRelationManager::class,
-            AdmissionsRelationManager::class,
+            // AdmissionsRelationManager::class,
             BatchesRelationManager::class,
         ];
     }

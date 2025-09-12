@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\Course;
 use App\Models\Batch;
 use Filament\Forms;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -23,71 +24,181 @@ class AdmissionResource extends Resource
     protected static ?string $navigationGroup = 'Academics';
     protected static ?string $navigationLabel = 'Admissions';
 
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                // Student
-                Forms\Components\Select::make('student_id')
-                    ->label('Student')
-                    ->relationship('student', 'first_name') // uses relation
-                    ->searchable()
-                    ->preload()
-                    ->required(),
+                Forms\Components\Section::make('Personal Information')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            Forms\Components\TextInput::make('first_name')
+                                ->label('First Name')
+                                ->required()
+                                ->placeholder('Enter first name'),
 
-                // Course
-                Forms\Components\Select::make('course_id')
-                    ->label('Course')
-                    ->relationship('course', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->required(),
+                            Forms\Components\TextInput::make('last_name')
+                                ->label('Last Name')
+                                ->placeholder('Enter last name'),
+                        ]),
 
-                // Batch
-                Forms\Components\Select::make('batch_id')
-                    ->label('Batch')
-                    ->relationship('batch', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->nullable(),
+                        Grid::make(2)->schema([
+                            Forms\Components\TextInput::make('email')
+                                ->label('Email')
+                                ->email()
+                                ->required()
+                                ->placeholder('example@example.com'),
 
-                Forms\Components\DatePicker::make('admitted_on')
-                    ->label('Admission Date')
-                    ->required(),
+                            Forms\Components\TextInput::make('mobile_number')
+                                ->label('Mobile Number')
+                                ->required()
+                                ->placeholder('Enter mobile number'),
 
-                Forms\Components\Select::make('status')
-                    ->label('Status')
-                    ->options([
-                        'pending'   => 'Pending',
-                        'admitted'  => 'Admitted',
-                        'rejected'  => 'Rejected',
-                        'withdrawn' => 'Withdrawn',
-                        'completed' => 'Completed',
-                    ])
-                    ->default('admitted')
-                    ->required(),
+                            Forms\Components\Select::make('gender')
+                                ->label('Gender')
+                                ->options([
+                                    'Female' => 'Female',
+                                    'Male' => 'Male',
+                                ])
+                                ->placeholder('Select gender'),
 
-                Forms\Components\TextInput::make('fee_total')
-                    ->label('Total Fee')
-                    ->numeric()
-                    ->prefix('₹')
-                    ->nullable(),
+                            Forms\Components\DatePicker::make('dob')
+                                ->label('Date of Birth')
+                                ->placeholder('Select date of birth'),
 
-                Forms\Components\TextInput::make('fee_paid')
-                    ->label('Fee Paid')
-                    ->numeric()
-                    ->prefix('₹')
-                    ->nullable(),
+                            // Forms\Components\TextInput::make('guardian_number')
+                            //     ->label('Guardian Number')
+                            //     ->placeholder('Enter guardian number'),
+                        ]),
+                        Forms\Components\Textarea::make('address')
+                            ->label('Address')
+                            ->placeholder('Enter address'),
+                    ]),
 
-                Forms\Components\TextInput::make('payment_reference')
-                    ->label('Payment Reference')
-                    ->maxLength(255)
-                    ->nullable(),
+                Forms\Components\Section::make('Academic Details')
+                    ->schema([
+                        Forms\Components\Grid::make(2)->schema([
+                            Forms\Components\Select::make('course_id')
+                                ->label('Course')
+                                ->relationship('course', 'name')
+                                ->required()
+                                ->placeholder('Select course'),
 
-                Forms\Components\KeyValue::make('meta')
-                    ->label('Additional Info')
-                    ->columnSpanFull()
-                    ->nullable(),
+                            Forms\Components\Select::make('batch_id')
+                                ->label('Batch')
+                                ->relationship('batch', 'name')
+                                ->required()
+                                ->placeholder('Select batch'),
+
+
+                            Forms\Components\Select::make('store_id')
+                                ->label('Branch')
+                                ->relationship('store', 'name')
+                                ->required()
+                                ->placeholder('Select branch'),
+
+                            Forms\Components\Select::make('occupation')
+                                ->label('Occupation')
+                                ->options([
+                                    'Job' => 'Job',
+                                    'Business' => 'Business',
+                                    'Self Employed' => 'Self Employed',
+                                    'Student' => 'Student',
+                                    'Other' => 'Other',
+                                ])
+                                ->required()
+                                ->placeholder('Select occupation'),
+                        ]),
+
+                        Forms\Components\CheckboxList::make('class_days')
+                            ->label('Class Days')
+                            ->options([
+                                'Monday' => 'Monday',
+                                'Tuesday' => 'Tuesday',
+                                'Wednesday' => 'Wednesday',
+                                'Thursday' => 'Thursday',
+                                'Friday' => 'Friday',
+                                'Saturday' => 'Saturday',
+                            ])
+                            ->columns(6)  // Display all 6 options in one row
+                            ->required()
+                            ->helperText('Select exactly 2 days')
+                            ->rule(['array', 'min:2', 'max:2'])
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if (count($state ?? []) > 2) {
+                                    array_pop($state);
+                                    $set('class_days', $state);
+                                }
+                            }),
+                    ]),
+
+                Forms\Components\Section::make('Admission Details')
+                    ->schema([
+                        Forms\Components\Grid::make(2)->schema([
+                            Forms\Components\DatePicker::make('admission_date')
+                                ->label('Admission Date')
+                                ->default(now())
+                                ->hidden()
+                                ->placeholder('Select admission date'),
+
+                            Forms\Components\DatePicker::make('admitted_on')
+                                ->label('Admitted On')
+                                ->required()
+                                ->default(now())
+                                ->placeholder('Select admitted date'),
+
+                            Forms\Components\Select::make('payment_method')
+                                ->label('Payment Method')
+                                ->options([
+                                    'Cash' => 'Cash',
+                                    'UPI' => 'UPI',
+                                    'Other' => 'Other',
+                                ])
+                                ->placeholder('Select payment method'),
+
+                            Forms\Components\Toggle::make('fee_submitted')
+                                ->label('Fee Submitted'),
+
+                            Forms\Components\TextInput::make('payment_reference')
+                                ->label('Payment Reference')
+                                ->placeholder('Enter payment reference'),
+
+                            Forms\Components\Select::make('status')
+                                ->label('Status')
+                                ->options([
+                                    'pending' => 'Pending',
+                                    'admitted' => 'Admitted',
+                                    'rejected' => 'Rejected',
+                                    'withdrawn' => 'Withdrawn',
+                                    'completed' => 'Completed',
+                                ])
+                                ->default('admitted'),
+
+                            Forms\Components\CheckboxList::make('heard_about')
+                                ->label('How did you hear about the class?')
+                                ->options([
+                                    'Google' => 'Google',
+                                    'Social Media' => 'Social Media',
+                                    'Reference' => 'Reference',
+                                    'Other' => 'Other',
+                                ])
+                                ->required()
+                                ->helperText('Select all that apply'),
+                        ]),
+
+                    ]),
+
+                Forms\Components\Section::make('Additional Information')
+                    ->schema([
+                        Forms\Components\FileUpload::make('photo_path')
+                            ->label('Photo')
+                            ->image(),
+
+                        Forms\Components\KeyValue::make('meta')
+                            ->label('Additional Info')
+                            ->nullable(),
+                    ]),
             ]);
     }
 
@@ -95,67 +206,21 @@ class AdmissionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('student.first_name')
-                    ->label('Student')
-                    ->description(fn ($record) => $record->student->last_name ?? null)
-                    ->sortable()
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('course.name')
-                    ->label('Course')
-                    ->sortable()
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('batch.name')
-                    ->label('Batch')
-                    ->sortable()
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('admitted_on')
-                    ->label('Admission Date')
-                    ->date()
-                    ->sortable(),
-
-                Tables\Columns\BadgeColumn::make('status')
-                    ->colors([
-                        'warning' => 'pending',
-                        'success' => 'admitted',
-                        'danger'  => 'rejected',
-                        'secondary' => 'withdrawn',
-                        'info'    => 'completed',
-                    ])
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('fee_total')
-                    ->label('Total Fee')
-                    ->money('INR')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('fee_paid')
-                    ->label('Fee Paid')
-                    ->money('INR')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('payment_reference')
-                    ->label('Payment Ref.')
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime('d M Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime('d M Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('email')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('first_name')->sortable(),
+                Tables\Columns\TextColumn::make('mobile_number'),
+                Tables\Columns\TextColumn::make('batch.name')->label('Batch'),
+                Tables\Columns\TextColumn::make('course.name')->label('Course'),
+                Tables\Columns\TextColumn::make('store.name')->label('Store'),
+                Tables\Columns\TextColumn::make('status')->sortable(),
+                Tables\Columns\TextColumn::make('admitted_on')->date(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'pending'   => 'Pending',
-                        'admitted'  => 'Admitted',
-                        'rejected'  => 'Rejected',
+                        'pending' => 'Pending',
+                        'admitted' => 'Admitted',
+                        'rejected' => 'Rejected',
                         'withdrawn' => 'Withdrawn',
                         'completed' => 'Completed',
                     ]),
@@ -185,9 +250,9 @@ class AdmissionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListAdmissions::route('/'),
-            'create' => Pages\CreateAdmission::route('/create'),
-            'edit'   => Pages\EditAdmission::route('/{record}/edit'),
+            'index' => Pages\ListAdmissions::route('/'),
+            // 'create' => Pages\CreateAdmission::route('/create'),
+            // 'edit' => Pages\EditAdmission::route('/{record}/edit'),
             // 'view'   => Pages\ViewAdmission::route('/{record}'),
         ];
     }

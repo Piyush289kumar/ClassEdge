@@ -23,7 +23,7 @@ class BatchResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')->required(),
-                Forms\Components\TextInput::make('code')->required(),
+                Forms\Components\TextInput::make('code')->required()->default(now())->readOnly(),
                 Forms\Components\Textarea::make('description'),
             ]);
     }
@@ -35,6 +35,16 @@ class BatchResource extends Resource
                 Tables\Columns\TextColumn::make('id'),
                 Tables\Columns\TextColumn::make('name')->searchable(),
                 Tables\Columns\TextColumn::make('code'),
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
@@ -50,9 +60,9 @@ class BatchResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListBatches::route('/'),
-            'create' => Pages\CreateBatch::route('/create'),
-            'edit'   => Pages\EditBatch::route('/{record}/edit'),
+            'index' => Pages\ListBatches::route('/'),
+            // 'create' => Pages\CreateBatch::route('/create'),
+            // 'edit'   => Pages\EditBatch::route('/{record}/edit'),
         ];
     }
 }

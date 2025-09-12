@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -25,6 +25,22 @@ class Admission extends Model
         'fee_paid',
         'payment_reference',
         'meta',
+        'email',
+        'first_name',
+        'last_name',
+        'address',
+        'mobile_number',
+        'dob',
+        'gender',
+        'payment_method',
+        'heard_about',
+        'store_id',
+        'occupation',
+        'class_days',
+        'batch_time',
+        'fee_submitted',
+        'photo_path',
+        // Add other fields as needed
     ];
 
     protected $casts = [
@@ -32,6 +48,9 @@ class Admission extends Model
         'fee_total' => 'decimal:2',
         'fee_paid' => 'decimal:2',
         'meta' => 'array',
+        'class_days' => 'array',
+        'batch_time' => 'datetime:H:i',
+        'heard_about' => 'array',
     ];
 
     protected static function boot()
@@ -43,18 +62,46 @@ class Admission extends Model
                 $model->{$model->getKeyName()} = (string) Str::ulid();
             }
         });
+
+        static::created(function ($admission) {
+            // If student_id is not set, attempt to find or create a student
+            if (empty($admission->student_id)) {
+                $student = Student::firstOrCreate(
+                    ['email' => $admission->email],
+                    [
+                        'first_name' => $admission->first_name,
+                        'last_name' => $admission->last_name,
+                        'address_line1' => $admission->address,
+                        'phone' => $admission->mobile_number,
+                        'dob' => $admission->dob,
+                        'gender' => $admission->gender,
+                        'photo_path' => $admission->photo_path,
+                    ]
+                );
+
+                // Assign the student_id to the admission
+                $admission->student_id = $student->id;
+                $admission->save();
+            }
+        });
     }
 
     public function student()
     {
         return $this->belongsTo(Student::class);
     }
+
     public function course()
     {
         return $this->belongsTo(Course::class);
     }
+
     public function batch()
     {
         return $this->belongsTo(Batch::class);
+    }
+    public function store()
+    {
+        return $this->belongsTo(Store::class);
     }
 }
