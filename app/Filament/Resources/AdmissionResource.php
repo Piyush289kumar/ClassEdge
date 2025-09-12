@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AdmissionResource\Pages;
+use App\Filament\Resources\StudentResource\RelationManagers\GuardiansRelationManager;
 use App\Models\Admission;
 use App\Models\Student;
 use App\Models\Course;
@@ -39,6 +40,7 @@ class AdmissionResource extends Resource
 
                             Forms\Components\TextInput::make('last_name')
                                 ->label('Last Name')
+                                ->required()
                                 ->placeholder('Enter last name'),
                         ]),
 
@@ -60,10 +62,12 @@ class AdmissionResource extends Resource
                                     'Female' => 'Female',
                                     'Male' => 'Male',
                                 ])
+                                ->required()
                                 ->placeholder('Select gender'),
 
                             Forms\Components\DatePicker::make('dob')
                                 ->label('Date of Birth')
+                                ->required()
                                 ->placeholder('Select date of birth'),
 
                             // Forms\Components\TextInput::make('guardian_number')
@@ -72,6 +76,7 @@ class AdmissionResource extends Resource
                         ]),
                         Forms\Components\Textarea::make('address')
                             ->label('Address')
+                            ->required()
                             ->placeholder('Enter address'),
                     ]),
 
@@ -139,6 +144,7 @@ class AdmissionResource extends Resource
                             Forms\Components\DatePicker::make('admission_date')
                                 ->label('Admission Date')
                                 ->default(now())
+                                ->required()
                                 ->hidden()
                                 ->placeholder('Select admission date'),
 
@@ -155,17 +161,20 @@ class AdmissionResource extends Resource
                                     'UPI' => 'UPI',
                                     'Other' => 'Other',
                                 ])
+                                ->required()
                                 ->placeholder('Select payment method'),
 
                             Forms\Components\Toggle::make('fee_submitted')
+                                ->required()
                                 ->label('Fee Submitted'),
 
                             Forms\Components\TextInput::make('payment_reference')
-                                ->label('Payment Reference')
+                                ->label('Payment Reference')                                
                                 ->placeholder('Enter payment reference'),
 
                             Forms\Components\Select::make('status')
                                 ->label('Status')
+                                ->required()
                                 ->options([
                                     'pending' => 'Pending',
                                     'admitted' => 'Admitted',
@@ -173,10 +182,10 @@ class AdmissionResource extends Resource
                                     'withdrawn' => 'Withdrawn',
                                     'completed' => 'Completed',
                                 ])
-                                ->default('admitted'),
+                                ->default('Pending'),
 
                             Forms\Components\CheckboxList::make('heard_about')
-                                ->label('How did you hear about the class?')
+                                ->label('How did you hear about the class?')                                
                                 ->options([
                                     'Google' => 'Google',
                                     'Social Media' => 'Social Media',
@@ -243,7 +252,7 @@ class AdmissionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            // In future: add PaymentRelationManager, DocumentsRelationManager, etc.
+            // GuardiansRelationManager::class,
         ];
     }
 
@@ -251,8 +260,8 @@ class AdmissionResource extends Resource
     {
         return [
             'index' => Pages\ListAdmissions::route('/'),
-            // 'create' => Pages\CreateAdmission::route('/create'),
-            // 'edit' => Pages\EditAdmission::route('/{record}/edit'),
+            'create' => Pages\CreateAdmission::route('/create'),
+            'edit' => Pages\EditAdmission::route('/{record}/edit'),
             // 'view'   => Pages\ViewAdmission::route('/{record}'),
         ];
     }
