@@ -8,24 +8,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
-class Course extends Model
+class CourseModule extends Model
 {
     use HasFactory, SoftDeletes, HasRoles;
+
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
-        'name',
+        'course_id',
+        'title',
         'description',
-        'duration',
-        'credits',
-        'meta',
+        'resources',
     ];
 
     protected $casts = [
-        'meta' => 'array',
+        'resources' => 'array',
     ];
-
 
     protected static function boot()
     {
@@ -38,23 +37,8 @@ class Course extends Model
         });
     }
 
-    public function subjects()
+    public function course()
     {
-        return $this->belongsToMany(Subject::class)->withPivot(['semester'])->withTimestamps();
-    }
-
-    public function batches()
-    {
-        return $this->hasMany(Batch::class);
-    }
-
-    public function admissions()
-    {
-        return $this->hasMany(Admission::class);
-    }
-
-    public function modules()
-    {
-        return $this->hasMany(CourseModule::class);
+        return $this->belongsTo(Course::class);
     }
 }

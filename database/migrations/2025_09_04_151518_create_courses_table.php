@@ -12,11 +12,11 @@ return new class extends Migration {
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('code')->unique();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->enum('duration', ['1 month', '3 month', '6 month', '1 year'])->default('1 month');
             $table->unsignedInteger('credits')->default(0);
-            $table->json('meta')->nullable();
+            $table->json('meta')->nullable(); // Store extra info if needed
             $table->timestamps();
             $table->softDeletes();
         });
