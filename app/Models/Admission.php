@@ -18,7 +18,9 @@ class Admission extends Model
     protected $fillable = [
         'student_id',
         'course_id',
+        'course_duration',
         'batch_id',
+        'guardian_id',
         'admitted_on',
         'status',
         'fee_total',
@@ -62,9 +64,7 @@ class Admission extends Model
                 $model->{$model->getKeyName()} = (string) Str::ulid();
             }
         });
-
         static::created(function ($admission) {
-            // If student_id is not set, attempt to find or create a student
             if (empty($admission->student_id)) {
                 $student = Student::firstOrCreate(
                     ['email' => $admission->email],
@@ -79,16 +79,41 @@ class Admission extends Model
                     ]
                 );
 
-                // Assign the student_id to the admission
                 $admission->student_id = $student->id;
                 $admission->save();
+            } else {
+                $student = Student::find($admission->student_id);
+            }
+
+            if ($student && !$student->guardians()->exists() && !empty($admission->guardian_name)) {
+                $guardian = Guardian::create([
+                    'first_name' => $admission->guardian_name,
+                    'last_name' => $admission->last_name,
+                    'email' => $admission->email,
+                    'phone' => $admission->guardian_phone,
+                    'occupation' => 'Other',
+                    'address_line1' => $admission->address,
+                    'meta' => [],
+                ]);
+
+                $student->guardians()->attach($guardian->id, [
+                    'relation_type' => 'guardian',
+                    'is_primary' => true,
+                ]);
             }
         });
+
     }
+
 
     public function student()
     {
         return $this->belongsTo(Student::class);
+    }
+
+    public function guardian()
+    {
+        return $this->belongsTo(Guardian::class);
     }
 
     public function course()

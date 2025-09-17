@@ -34,10 +34,9 @@ class CourseResource extends Resource
                 Forms\Components\Select::make('duration')
                     ->label('Duration')
                     ->options([
-                        '1 month' => '1 month',
-                        '3 month' => '3 month',
-                        '6 month' => '6 month',
-                        '1 year' => '1 year',
+                        '3 month' => '3-Month Beginner',
+                        '6 month' => '6-Month Advanced',
+                        '1 year' => '1-Year Mastery',
                     ])
                     ->required()
                     ->default('1 month'),
@@ -58,7 +57,7 @@ class CourseResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label('Course Name')->searchable(),
-                Tables\Columns\TextColumn::make('description')->label('Description'),                
+                Tables\Columns\TextColumn::make('description')->label('Description'),
             ])
             ->filters([])
             ->actions([

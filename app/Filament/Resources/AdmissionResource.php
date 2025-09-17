@@ -59,8 +59,9 @@ class AdmissionResource extends Resource
                             Forms\Components\Select::make('gender')
                                 ->label('Gender')
                                 ->options([
-                                    'Female' => 'Female',
                                     'Male' => 'Male',
+                                    'Female' => 'Female',
+                                    'Other' => 'Other',
                                 ])
                                 ->required()
                                 ->placeholder('Select gender'),
@@ -69,11 +70,32 @@ class AdmissionResource extends Resource
                                 ->label('Date of Birth')
                                 ->required()
                                 ->placeholder('Select date of birth'),
+                            Forms\Components\Select::make('guardian_id')
+                                ->label('Guardian')
+                                ->relationship('guardian', 'first_name')
+                                ->searchable()
+                                ->preload()
+                                ->createOptionForm([
+                                    Forms\Components\TextInput::make('first_name')
+                                        ->required()
+                                        ->maxLength(255),
+                                    Forms\Components\TextInput::make('last_name')
+                                        ->maxLength(255),
+                                    Forms\Components\TextInput::make('phone')
+                                        ->maxLength(20),
+                                    Forms\Components\TextInput::make('email')
+                                        ->email()
+                                        ->maxLength(255),
+                                    Forms\Components\TextInput::make('occupation')
+                                        ->maxLength(255),
+                                ])
+                                ->placeholder('Select or create guardian'),
 
-                            // Forms\Components\TextInput::make('guardian_number')
-                            //     ->label('Guardian Number')
-                            //     ->placeholder('Enter guardian number'),
                         ]),
+
+
+
+
                         Forms\Components\Textarea::make('address')
                             ->label('Address')
                             ->required()
@@ -82,12 +104,22 @@ class AdmissionResource extends Resource
 
                 Forms\Components\Section::make('Academic Details')
                     ->schema([
-                        Forms\Components\Grid::make(2)->schema([
+                        Forms\Components\Grid::make(3)->schema([
                             Forms\Components\Select::make('course_id')
                                 ->label('Course')
                                 ->relationship('course', 'name')
                                 ->required()
                                 ->placeholder('Select course'),
+
+                            Forms\Components\Select::make('course_duration')
+                                ->label('Course Duration')
+                                ->options([
+                                    '3 month' => '3-Month Beginner',
+                                    '6 month' => '6-Month Advanced',
+                                    '1 year' => '1-Year Mastery',
+                                ])
+                                ->required()
+                                ->default('3 month'),
 
                             Forms\Components\Select::make('batch_id')
                                 ->label('Batch')
@@ -162,6 +194,7 @@ class AdmissionResource extends Resource
                                     'Other' => 'Other',
                                 ])
                                 ->required()
+                                ->default('Cash')
                                 ->placeholder('Select payment method'),
 
                             Forms\Components\Toggle::make('fee_submitted')
@@ -169,7 +202,7 @@ class AdmissionResource extends Resource
                                 ->label('Fee Submitted'),
 
                             Forms\Components\TextInput::make('payment_reference')
-                                ->label('Payment Reference')                                
+                                ->label('Payment Reference')
                                 ->placeholder('Enter payment reference'),
 
                             Forms\Components\Select::make('status')
@@ -182,10 +215,10 @@ class AdmissionResource extends Resource
                                     'withdrawn' => 'Withdrawn',
                                     'completed' => 'Completed',
                                 ])
-                                ->default('Pending'),
+                                ->default('pending'),
 
                             Forms\Components\CheckboxList::make('heard_about')
-                                ->label('How did you hear about the class?')                                
+                                ->label('How did you hear about the class?')
                                 ->options([
                                     'Google' => 'Google',
                                     'Social Media' => 'Social Media',

@@ -13,6 +13,7 @@ return new class extends Migration {
 
             // Student details
             $table->foreignUlid('student_id')->nullable()->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->ulid('guardian_id')->nullable();
 
             $table->string('email');
             $table->string('first_name');
@@ -26,6 +27,7 @@ return new class extends Migration {
             $table->string('photo_path')->nullable(); // Uploaded photo
 
             $table->foreignUlid('course_id')->nullable()->constrained()->cascadeOnUpdate()->restrictOnDelete();
+            $table->string('course_duration')->nullable();
 
             $table->date('dob')->nullable();
             $table->enum('gender', ['Female', 'Male'])->nullable();
